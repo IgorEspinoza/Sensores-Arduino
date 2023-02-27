@@ -1,5 +1,10 @@
+#include <EtherCard.h>  // libreria de internet
+#include <ArduinoJson.hpp>
+#include <ArduinoJson.h>
+
 //varibles de sensores
-const byte sensor1 = 1;
+
+const byte sensor0 = 0;
 const byte sensor2 = 2;
 const byte sensor3 = 3;
 const byte sensor4 = 4;
@@ -8,112 +13,172 @@ const byte sensor6 = 6;
 const byte sensor7 = 7;
 const byte sensor8 = 8;
 const byte sensor9 = 9;
-const byte sensor10 = 10;
-const byte sensor11 = 11;
+
+
 
 // array que almacena los asientos disponibles
-const int N = 11;
-int asientos[N] = { 1, 4, 6, 8, 11, 14, 17, 20, 23, 26, 29};
+const int N = 8;
+int asientos[] = { 1, 2, 4, 5, 6, 7, 8, 9 };
 
 // inicialzando los pines en alto
-int asiento1 = HIGH;  //Asiento disponible
-int asiento4 = HIGH;  //Asiento disponible
-int asiento6 = HIGH;  //Asiento disponible
+int asiento1 = HIGH;   //Asiento disponible
+int asiento2 = HIGH;   //Asiento disponible
+int asiento4 = HIGH;   //Asiento disponible
+int asiento5 = HIGH;   //Asiento disponible
+int asiento6 = HIGH;   //Asiento disponible
+int asiento7 = HIGH;  //Asiento disponible
 int asiento8 = HIGH;  //Asiento disponible
-int asiento11 = HIGH;  //Asiento disponible
-int asiento14 = HIGH;  //Asiento disponible
-int asiento17 = HIGH;  //Asiento disponible
-int asiento20 = HIGH;  //Asiento disponible
-int asiento23 = HIGH;  //Asiento disponible
-int asiento26 = HIGH;  //Asiento disponible
-int asiento29 = HIGH;  //Asiento disponible
+int asiento9 = HIGH;  //Asiento disponible
+
 
 //numero de identificacion del bus
-int numeroBus_1 = 1000;
-
+int numeroBus_1 = 500;
 int dt = 1000;
+
+//----------------------------------------------------------------------
+// CONEXION
+
+// Si colocamos 1 deshabilitamos el DHCP
+// Si colocamos 0 colocamos una IP estática
+#define ESTATICA 1
+
+#if ESTATICA
+// Colocamos la dirección IP al dispositivo
+static byte myip[] = { 43, 68, 12, 26 };
+// Colocamos la dirección IP de la puerta de enlace de nuestro router
+static byte gwip[] = { 43, 68, 12, 1 };
+
+#endif
+
+// Colocamos la dirección MAC, que sera único en nuestra red
+static byte mymac[] = { 0x90, 0xA2, 0xDA, 0x0A, 0xA0, 0x88 };
+
+// Enviar y recibir buffer (TCP/IP)
+byte Ethernet::buffer[500];
+
+//---------------------------------------------------------------------
+// Pagina Web
+
+const char page[] PROGMEM =
+  "HTTP/1.0 503 Ethernet Hanrun HR911105A - \r\n"
+  "Content-Type: text/html\r\n"
+  "Retry-After: 600\r\n"
+  "\r\n"
+  "<html>"
+  "<head><title>"
+  "Asientos Libres"
+  "</title></head>"
+  "<body>"
+  "<h3>Andimar</h3>"
+  "<p><em>"
+  "Asientos libres en bus 500: 'variable json'<br />"
+  "</em></p>"
+  "</body>"
+  "</html>",
+                  json;
+
+
+//-----------------------------------------------------------------------
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
+  conexion();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  asiento1 = digitalRead(sensor1);
-  asiento4 = digitalRead(sensor2);
-  asiento6 = digitalRead(sensor3);
-  asiento8 = digitalRead(sensor4);
-  asiento11 = digitalRead(sensor5);
-  asiento14 = digitalRead(sensor6);
-  asiento17 = digitalRead(sensor7);
-  asiento20 = digitalRead(sensor8);
-  asiento23 = digitalRead(sensor9);
-  asiento26 = digitalRead(sensor10);
-  asiento29 = digitalRead(sensor11);
 
-  if (asiento1 == HIGH) {    
+  asiento1 = digitalRead(sensor0);
+  asiento2 = digitalRead(sensor2);
+  asiento4 = digitalRead(sensor3);
+  asiento5 = digitalRead(sensor4);
+  asiento6 = digitalRead(sensor5);
+  asiento7 = digitalRead(sensor6);
+  asiento8 = digitalRead(sensor7);
+  asiento9 = digitalRead(sensor8);
+ 
+
+
+  if (asiento1 == HIGH) {  //valida que el sensor no detecte nada y guarda el numero del asiento
     asientos[0] = 1;
-  } else {
+  } else {  // caso contrario almacena un 0
     asientos[0] = 0;
   }
-  if (asiento4 == HIGH) {
-    asientos[1] = 4;
+
+  if (asiento2 == HIGH) {
+    asientos[1] = 2;
   } else {
     asientos[1] = 0;
   }
-  if (asiento6 == HIGH) {
-    asientos[2] = 6;
+
+  if (asiento4 == HIGH) {
+    asientos[2] = 4;
   } else {
     asientos[2] = 0;
   }
-  if (asiento8 == HIGH) {
-    asientos[3] = 8;
+
+  if (asiento5 == HIGH) {
+    asientos[3] = 5;
   } else {
     asientos[3] = 0;
   }
-  if (asiento11 == HIGH) {
-    asientos[4] = 11;
+
+  if (asiento6 == HIGH) {
+    asientos[4] = 6;
   } else {
     asientos[4] = 0;
   }
-  if (asiento14 == HIGH) {
-    asientos[5] = 14;
+
+  if (asiento7 == HIGH) {
+    asientos[5] = 7;
   } else {
     asientos[5] = 0;
   }
-  if (asiento17 == HIGH) {
-    asientos[6] = 17;
+
+  if (asiento8 == HIGH) {
+    asientos[6] = 8;
   } else {
     asientos[6] = 0;
   }
-  if (asiento20 == HIGH) {
-    asientos[7] = 20;
+  
+  if (asiento9 == HIGH) {
+    asientos[7] = 9;
   } else {
     asientos[7] = 0;
   }
-  if (asiento23 == HIGH) {
-    asientos[8] = 23;
-  } else {
-    asientos[8] = 0;
-  }
-  if (asiento26 == HIGH) {
-    asientos[9] = 26;
-  } else {
-    asientos[9] = 0;
-  }
-  if (asiento29 == HIGH) {
-    asientos[10] = 29;
-  } else {
-    asientos[10] = 0;
-  }
 
-  imprimir();
-  delay(dt);
+  web();
 }
 
-void imprimir() {
+void web() {
+  if (ether.packetLoop(ether.packetReceive())) {
+    memcpy_P(ether.tcpOffset(), page, sizeof page);
+    imprimir();
+    ether.httpServerReply(sizeof page - 1);
+  }
+}
 
+void conexion() {
+  Serial.println("\n[Conexion]");
+
+  if (ether.begin(sizeof Ethernet::buffer, mymac) == 0)  // valida la conexion a internet
+    Serial.println("Error al acceder al controlador Ethernet");
+#if ESTATICA
+  ether.staticSetup(myip, gwip);
+#else
+  if (!ether.dhcpSetup())
+    Serial.println("DHCP falló");
+#endif
+  // si se conecta muestra la informacion siguiente
+  ether.printIp("IP:  ", ether.myip);
+  ether.printIp("GW:  ", ether.gwip);
+  ether.printIp("DNS: ", ether.dnsip);
+  Serial.println();
+}
+
+
+
+void imprimir() {
   Serial.print("Asientos disponibles en bus ");
   Serial.print(numeroBus_1);
   Serial.print(": ");
@@ -122,11 +187,16 @@ void imprimir() {
 }
 
 void disponibilidad() {
-  for (int i = 0; i < N; i++) {
-    if (asientos[i] != 0) {
-      Serial.print(asientos[i]);
-      Serial.print(",");      
+  String json;
+  StaticJsonDocument<300> doc;
+  JsonArray arr = doc.createNestedArray();
+  for (int i = 0; i < N; i++) {  // recorre el array que almacena los numeros de los asientos
+    if (asientos[i] != 0) {      // valida que los numeros del array eh imprime los que tengan un numero que sea distinto a 0
+      
+      arr.add(asientos[i]);
     }
   }
+  serializeJson(doc, json);
+  Serial.println(json);
   Serial.println();
 }

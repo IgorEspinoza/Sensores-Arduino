@@ -18,16 +18,13 @@ const byte sensor9 = 9;
 
 // array que almacena los asientos disponibles
 const int N = 8;
-int asientos[] = { 23, 24, 26, 27, 29, 30 };
+int asientos[] = { 34, 37, 40, 43 };
 
 // inicialzando los pines en alto
-int asiento23 = HIGH;   //Asiento disponible
-int asiento24 = HIGH;   //Asiento disponible
-int asiento26 = HIGH;   //Asiento disponible
-int asiento27 = HIGH;   //Asiento disponible
-int asiento29 = HIGH;  //Asiento disponible
-int asiento30 = HIGH;  //Asiento disponible
-
+int asiento34 = HIGH;   //Asiento disponible
+int asiento37 = HIGH;   //Asiento disponible
+int asiento40 = HIGH;   //Asiento disponible
+int asiento43 = HIGH;   //Asiento disponible
 
 //numero de identificacion del bus
 int numeroBus_1 = 500;
@@ -86,51 +83,34 @@ void setup() {
 
 void loop() {
 
-  //se leen los pines y se guarda el estado en la variable
-  asiento23 = digitalRead(sensor0);
-  asiento24 = digitalRead(sensor2);
-  asiento26 = digitalRead(sensor3);
-  asiento27 = digitalRead(sensor4);
-  asiento29 = digitalRead(sensor5);
-  asiento30 = digitalRead(sensor6);
-
- 
+  asiento34 = digitalRead(sensor0);
+  asiento37 = digitalRead(sensor2);
+  asiento40 = digitalRead(sensor3);
+  asiento43 = digitalRead(sensor4);
 
 
-  if (asiento23 == HIGH) {  //valida que el sensor no detecte nada y guarda el numero del asiento
-    asientos[0] = 23;
+  if (asiento34 == HIGH) {  //valida que el sensor no detecte nada y guarda el numero del asiento
+    asientos[0] = 34;
   } else {  // caso contrario almacena un 0
     asientos[0] = 0;
   }
 
-  if (asiento24 == HIGH) {
-    asientos[1] = 24;
+  if (asiento37 == HIGH) {
+    asientos[1] = 37;
   } else {
     asientos[1] = 0;
   }
 
-  if (asiento26 == HIGH) {
-    asientos[2] = 26;
+  if (asiento40 == HIGH) {
+    asientos[2] = 40;
   } else {
     asientos[2] = 0;
   }
 
-  if (asiento27 == HIGH) {
-    asientos[3] = 27;
+  if (asiento43 == HIGH) {
+    asientos[3] = 43;
   } else {
     asientos[3] = 0;
-  }
-
-  if (asiento29 == HIGH) {
-    asientos[4] = 29;
-  } else {
-    asientos[4] = 0;
-  }
-
-  if (asiento30 == HIGH) {
-    asientos[5] = 30;
-  } else {
-    asientos[5] = 0;
   }
 
   web();
